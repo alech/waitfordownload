@@ -1,10 +1,10 @@
 module Main where
 
-import System.INotify
-import System.Exit (exitFailure)
-import Control.Concurrent (threadDelay, myThreadId, killThread)
 import System.Environment (getArgs)
 import System.IO (hPutStrLn, stderr)
+import System.INotify (withINotify, addWatch, EventVariety(..))
+import Control.Concurrent.MVar (newEmptyMVar, putMVar, takeMVar)
+import System.Exit (exitFailure, exitSuccess)
 import qualified Data.ByteString.Char8 as B
 
 usage :: IO ()
@@ -14,14 +14,15 @@ usage = do
 
 watchForDeletion :: B.ByteString -> IO ()
 watchForDeletion filename = do
-  mti <- myThreadId
+  deleted <- newEmptyMVar
   withINotify $ \ino -> do
     addWatch
       ino
       [DeleteSelf] -- watch for .part file to be deleted
       filename
-      (\_ -> killThread mti) -- then just kill our thread
-    threadDelay maxBound
+      (\_ -> putMVar deleted ()) -- signal with MVar that we continue
+    takeMVar deleted -- wait for the putMVar from the watch
+    exitSuccess
 
 main :: IO ()
 main = do
