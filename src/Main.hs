@@ -29,6 +29,9 @@ main = do
   args <- getArgs
   if null args then
     usage
-  else do
-    let partFilename = B.pack $ head args ++ ".part" -- this is for Firefox
-    watchForDeletion partFilename
+  else
+    let
+      partFilename = B.pack $ head args ++ ".part" -- this is for Firefox
+    in
+      do
+        watchForDeletion partFilename
