@@ -33,5 +33,4 @@ main = do
     let
       partFilename = B.pack $ head args ++ ".part" -- this is for Firefox
     in
-      do
-        watchForDeletion partFilename
+      watchForDeletion partFilename
